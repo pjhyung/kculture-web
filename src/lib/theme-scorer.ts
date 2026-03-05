@@ -5,6 +5,8 @@ interface Answer {
   value: string
 }
 
+const DEFAULT_THEME_ORDER: Theme[] = ['kdrama', 'kpop', 'tradition', 'fantasy', 'daily', 'seoul']
+
 const SCORE_MAP: Record<string, Theme[]> = {
   // q1
   drama: ['kdrama'],
@@ -41,6 +43,10 @@ export function scoreThemes(answers: Answer[]): Theme[] {
   }
 
   return (Object.entries(scores) as [Theme, number][])
-    .sort(([, a], [, b]) => b - a)
+    .sort(([themeA, scoreA], [themeB, scoreB]) => {
+      if (scoreB !== scoreA) return scoreB - scoreA
+      // 동점 시 DEFAULT_THEME_ORDER 기준으로 정렬
+      return DEFAULT_THEME_ORDER.indexOf(themeA) - DEFAULT_THEME_ORDER.indexOf(themeB)
+    })
     .map(([theme]) => theme)
 }

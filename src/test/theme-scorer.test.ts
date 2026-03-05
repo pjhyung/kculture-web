@@ -25,9 +25,11 @@ describe('Theme Scorer', () => {
     expect(result).toHaveLength(6)
   })
 
-  it('빈 응답도 6개 테마 반환', () => {
+  it('빈 응답도 6개 테마 반환, 동점 시 기본 순서 적용', () => {
     const result = scoreThemes([])
     expect(result).toHaveLength(6)
+    // 동점 시 DEFAULT_THEME_ORDER 기준 — kdrama가 첫 번째
+    expect(result[0]).toBe('kdrama')
   })
 
   it('music 응답은 kpop이 상위', () => {
