@@ -45,6 +45,8 @@ export function getArticlesByTheme(theme: Theme): Article[] {
 }
 
 export function getArticle(theme: Theme, slug: string): Article | null {
+  // Validate slug against safe character allowlist
+  if (!/^[a-z0-9-]+$/.test(slug)) return null
   const filePath = path.join(CONTENT_DIR, theme, `${slug}.mdx`)
   if (!fs.existsSync(filePath)) return null
 

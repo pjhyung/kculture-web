@@ -117,7 +117,7 @@ export function ExploreCard({ theme }: Props) {
             {/* 추천 배지 */}
             {data?.recommendations && data.recommendations.length > 0 && (
               <div className="flex gap-2 flex-wrap">
-                {data.recommendations.map((rec, i) => (
+                {data.recommendations.map((rec) => (
                   <span
                     key={rec.title}
                     className="text-xs px-3 py-1 rounded-full bg-[#F5A623]/20 text-[#F5A623]"

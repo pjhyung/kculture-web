@@ -23,6 +23,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid theme' }, { status: 400 })
     }
 
+    if (!Number.isInteger(step) || step < 1 || step > 10) {
+      return NextResponse.json({ error: 'Invalid step' }, { status: 400 })
+    }
+    if (typeof choice !== 'string' || choice.length > 200) {
+      return NextResponse.json({ error: 'Invalid choice' }, { status: 400 })
+    }
+
     // 캐시 우선 확인
     const cacheKey = getCacheKey(theme, step, choice)
     const cached = await getCachedResponse(cacheKey)
