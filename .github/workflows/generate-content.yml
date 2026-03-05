@@ -1,0 +1,35 @@
+name: Daily Content Generation
+
+on:
+  schedule:
+    - cron: '0 17 * * *'  # 매일 새벽 2시 KST (UTC 17:00)
+  workflow_dispatch:       # 수동 실행 가능
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate content
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npx tsx scripts/generate-content.ts
+
+      - name: Commit generated content
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "K-World Content Bot"
+          git add content/
+          git diff --staged --quiet || git commit -m "content: auto-generate daily K-culture articles [skip ci]"
+          git push
