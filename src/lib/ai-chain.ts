@@ -55,6 +55,7 @@ async function callCloudflareAI(prompt: string): Promise<AIResponse> {
   )
   if (!response.ok) throw new Error(`Cloudflare AI error: ${response.status}`)
   const data = await response.json()
+  if (!data.result?.response) throw new Error('Cloudflare AI: empty response')
   return {
     content: data.result.response,
     model: 'cloudflare-llama-3.3',

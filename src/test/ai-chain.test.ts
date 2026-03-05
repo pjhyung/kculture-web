@@ -49,4 +49,16 @@ describe('AI Fallback Chain', () => {
     expect(result.model).toBe('cache')
     expect(result.content).toBe('cached fallback')
   })
+
+  it('빈 content 반환 시 다음 모델로 폴백', async () => {
+    const result = await generateWithFallback('test prompt', {
+      _testOverride: {
+        gemini: async () => ({ content: '', model: 'gemini' }),
+        groq: async () => ({ content: 'groq fallback', model: 'groq' }),
+        cloudflare: async () => { throw new Error('should not call') },
+      }
+    })
+    expect(result.model).toBe('groq')
+    expect(result.content).toBe('groq fallback')
+  })
 })
