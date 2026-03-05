@@ -24,16 +24,24 @@ function DashboardContent() {
           Welcome to K-World
         </h1>
         <p className="text-[#9A9AB0] mb-10">
-          Based on your interests, we highlighted your top themes below.
+          {themesParam
+            ? 'Based on your interests, we highlighted your top themes below.'
+            : 'Explore all available K-Culture themes.'}
         </p>
 
         {/* 추천 테마 (상위 2개 강조) */}
-        <h2 className="text-[#EAEAEA] font-medium mb-4">✨ Recommended for you</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          {topThemes.map((theme) => (
-            <ThemeCard key={theme} theme={theme} highlighted />
-          ))}
-        </div>
+        {topThemes.length > 0 && (
+          <>
+            <h2 className="text-[#EAEAEA] font-medium mb-4">
+              <span aria-hidden="true">✨ </span>Recommended for you
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+              {topThemes.map((theme) => (
+                <ThemeCard key={theme} theme={theme} highlighted />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* 나머지 테마 */}
         <h2 className="text-[#9A9AB0] font-medium mb-4">Explore all worlds</h2>
