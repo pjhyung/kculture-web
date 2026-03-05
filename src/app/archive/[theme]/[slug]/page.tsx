@@ -55,8 +55,8 @@ export default async function ArticlePage({ params }: Props) {
           <div className="mt-10 p-6 rounded-2xl border border-[#2A2A3E] bg-[#1A1A2E]">
             <h3 className="font-playfair text-lg text-[#F5A623] mb-4">Recommendations</h3>
             <ul className="space-y-2">
-              {article.recommendations.map((rec, i) => (
-                <li key={i} className="text-[#9A9AB0] text-sm flex items-start gap-2">
+              {article.recommendations.map((rec) => (
+                <li key={rec} className="text-[#9A9AB0] text-sm flex items-start gap-2">
                   <span className="text-[#E94560] mt-0.5">→</span>
                   {rec}
                 </li>

@@ -24,18 +24,23 @@ export function getArticlesByTheme(theme: Theme): Article[] {
 
   return files
     .map((file) => {
-      const raw = fs.readFileSync(path.join(dir, file), 'utf-8')
-      const { data, content } = matter(raw)
-      return {
-        slug: file.replace('.mdx', ''),
-        theme,
-        title: data.title ?? 'Untitled',
-        excerpt: data.excerpt ?? '',
-        date: data.date ?? new Date().toISOString().split('T')[0],
-        content,
-        recommendations: data.recommendations ?? [],
+      try {
+        const raw = fs.readFileSync(path.join(dir, file), 'utf-8')
+        const { data, content } = matter(raw)
+        return {
+          slug: file.replace('.mdx', ''),
+          theme,
+          title: data.title ?? 'Untitled',
+          excerpt: data.excerpt ?? '',
+          date: data.date ?? new Date().toISOString().split('T')[0],
+          content,
+          recommendations: data.recommendations ?? [],
+        } satisfies Article
+      } catch {
+        return null
       }
     })
+    .filter((a): a is Article => a !== null)
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
@@ -43,15 +48,19 @@ export function getArticle(theme: Theme, slug: string): Article | null {
   const filePath = path.join(CONTENT_DIR, theme, `${slug}.mdx`)
   if (!fs.existsSync(filePath)) return null
 
-  const raw = fs.readFileSync(filePath, 'utf-8')
-  const { data, content } = matter(raw)
-  return {
-    slug,
-    theme,
-    title: data.title ?? 'Untitled',
-    excerpt: data.excerpt ?? '',
-    date: data.date ?? new Date().toISOString().split('T')[0],
-    content,
-    recommendations: data.recommendations ?? [],
+  try {
+    const raw = fs.readFileSync(filePath, 'utf-8')
+    const { data, content } = matter(raw)
+    return {
+      slug,
+      theme,
+      title: data.title ?? 'Untitled',
+      excerpt: data.excerpt ?? '',
+      date: data.date ?? new Date().toISOString().split('T')[0],
+      content,
+      recommendations: data.recommendations ?? [],
+    }
+  } catch {
+    return null
   }
 }
