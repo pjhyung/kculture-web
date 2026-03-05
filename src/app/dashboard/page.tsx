@@ -8,8 +8,8 @@ import { ThemeCard } from '@/components/layout/ThemeCard'
 function DashboardContent() {
   const params = useSearchParams()
   const themesParam = params.get('themes')
-  const rankedThemes = themesParam
-    ? (themesParam.split(',') as Theme[])
+  const rankedThemes: Theme[] = themesParam
+    ? themesParam.split(',').filter((t): t is Theme => (THEMES as readonly string[]).includes(t))
     : [...THEMES]
 
   const topThemes = rankedThemes.slice(0, 2)
