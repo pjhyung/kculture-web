@@ -29,7 +29,6 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         <Script
-          async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
           crossOrigin="anonymous"
           strategy="lazyOnload"

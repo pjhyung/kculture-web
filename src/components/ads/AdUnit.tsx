@@ -14,7 +14,6 @@ declare global {
 }
 
 export function AdUnit({ slot, format = 'auto', className = '' }: Props) {
-  const adRef = useRef<HTMLModElement>(null)
   const initialized = useRef(false)
 
   useEffect(() => {
@@ -28,7 +27,6 @@ export function AdUnit({ slot, format = 'auto', className = '' }: Props) {
   return (
     <div className={`overflow-hidden ${className}`}>
       <ins
-        ref={adRef}
         className="adsbygoogle"
         style={{ display: 'block' }}
         data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_ID}

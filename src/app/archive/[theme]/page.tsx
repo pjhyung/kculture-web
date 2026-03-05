@@ -50,7 +50,7 @@ export default async function ArchiveThemePage({ params }: Props) {
                   <p className="text-[#9A9AB0] text-sm">{article.excerpt}</p>
                 </Link>
                 {index === 1 && articles.length > 2 && (
-                  <AdUnit slot="ADSENSE_SLOT_ID" format="horizontal" className="my-4" />
+                  <AdUnit slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARCHIVE ?? ''} format="horizontal" className="my-4" />
                 )}
               </React.Fragment>
             ))}
