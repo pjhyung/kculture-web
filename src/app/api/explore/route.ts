@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateWithFallback } from '@/lib/ai-chain'
 import { getCacheKey, getCachedResponse, setCachedResponse } from '@/lib/cache'
 import { buildExplorePrompt } from '@/lib/explore-prompt'
+import { THEMES } from '@/lib/themes'
 import type { Theme } from '@/lib/themes'
 
 export async function POST(req: NextRequest) {
@@ -18,11 +19,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    if (!THEMES.includes(theme)) {
+      return NextResponse.json({ error: 'Invalid theme' }, { status: 400 })
+    }
+
     // 캐시 우선 확인
     const cacheKey = getCacheKey(theme, step, choice)
     const cached = await getCachedResponse(cacheKey)
     if (cached) {
-      return NextResponse.json({ ...JSON.parse(cached), cached: true })
+      try {
+        return NextResponse.json({ ...JSON.parse(cached), cached: true })
+      } catch {
+        // 캐시 파싱 실패 시 AI 호출로 폴백
+      }
     }
 
     // AI 폴백 체인으로 생성
