@@ -31,19 +31,21 @@ export function ExploreCard({ theme }: Props) {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const themeConfig = THEME_CONFIG[theme]
 
-  const fetchExplore = async (choice: string) => {
+  const fetchExplore = async (choice: string, signal?: AbortSignal) => {
     setLoading(true)
     try {
       const res = await fetch('/api/explore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ theme, step, choice }),
+        signal,
       })
       if (!res.ok) throw new Error('API error')
       const result: ExploreData = await res.json()
       setData(result)
       setStep(prev => prev + 1)
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return
       setData({
         content: 'Something went wrong. Please try again.',
         choices: [],
@@ -62,7 +64,10 @@ export function ExploreCard({ theme }: Props) {
   }
 
   useEffect(() => {
-    fetchExplore('start')
+    const controller = new AbortController()
+    // step은 초기값(1)이 고정이므로 deps 생략 안전
+    fetchExplore('start', controller.signal)
+    return () => controller.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -114,7 +119,7 @@ export function ExploreCard({ theme }: Props) {
               <div className="flex gap-2 flex-wrap">
                 {data.recommendations.map((rec, i) => (
                   <span
-                    key={i}
+                    key={rec.title}
                     className="text-xs px-3 py-1 rounded-full bg-[#F5A623]/20 text-[#F5A623]"
                   >
                     {rec.type}: {rec.title}
@@ -140,7 +145,7 @@ export function ExploreCard({ theme }: Props) {
             )}
 
             <p className="text-[#9A9AB0] text-xs text-right">
-              Step {step - 1} · {data?.cached ? '⚡ cached' : `AI: ${data?.model}`}
+              Step {Math.max(1, step - 1)} · {data?.cached ? '⚡ cached' : `AI: ${data?.model}`}
             </p>
           </motion.div>
         )}
