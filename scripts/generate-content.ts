@@ -25,7 +25,7 @@ function isValidArticle(obj: unknown): obj is ArticleResponse {
   const a = obj as Record<string, unknown>
   return (
     typeof a.title === 'string' && a.title.length > 0 &&
-    typeof a.excerpt === 'string' &&
+    typeof a.excerpt === 'string' && a.excerpt.length > 0 &&
     typeof a.body === 'string' && a.body.length > 0 &&
     Array.isArray(a.recommendations) &&
     a.recommendations.every((r: unknown) => typeof r === 'string')
@@ -33,7 +33,7 @@ function isValidArticle(obj: unknown): obj is ArticleResponse {
 }
 
 function escapeYaml(str: string): string {
-  return str.replace(/"/g, '\\"')
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')
 }
 
 async function generateArticle(theme: string, genAI: GoogleGenerativeAI): Promise<boolean> {
