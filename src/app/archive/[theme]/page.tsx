@@ -1,8 +1,10 @@
+import React from 'react'
 import { THEMES, THEME_CONFIG } from '@/lib/themes'
 import type { Theme } from '@/lib/themes'
 import { getArticlesByTheme } from '@/lib/content'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { AdUnit } from '@/components/ads/AdUnit'
 
 export const revalidate = 86400 // ISR: 24시간
 
@@ -36,17 +38,21 @@ export default async function ArchiveThemePage({ params }: Props) {
           <p className="text-[#9A9AB0]">Content coming soon — check back tomorrow!</p>
         ) : (
           <div className="space-y-4">
-            {articles.map((article) => (
-              <Link
-                key={article.slug}
-                href={`/archive/${theme}/${article.slug}`}
-                className="block p-6 rounded-2xl border border-[#2A2A3E] bg-[#1A1A2E]
-                           hover:border-[#E94560] transition-all duration-200"
-              >
-                <p className="text-[#9A9AB0] text-xs mb-2">{article.date}</p>
-                <h2 className="font-playfair text-xl text-[#EAEAEA] mb-2">{article.title}</h2>
-                <p className="text-[#9A9AB0] text-sm">{article.excerpt}</p>
-              </Link>
+            {articles.map((article, index) => (
+              <React.Fragment key={article.slug}>
+                <Link
+                  href={`/archive/${theme}/${article.slug}`}
+                  className="block p-6 rounded-2xl border border-[#2A2A3E] bg-[#1A1A2E]
+                             hover:border-[#E94560] transition-all duration-200"
+                >
+                  <p className="text-[#9A9AB0] text-xs mb-2">{article.date}</p>
+                  <h2 className="font-playfair text-xl text-[#EAEAEA] mb-2">{article.title}</h2>
+                  <p className="text-[#9A9AB0] text-sm">{article.excerpt}</p>
+                </Link>
+                {index === 1 && articles.length > 2 && (
+                  <AdUnit slot="ADSENSE_SLOT_ID" format="horizontal" className="my-4" />
+                )}
+              </React.Fragment>
             ))}
           </div>
         )}
