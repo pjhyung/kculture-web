@@ -7,9 +7,13 @@ interface Props {
   className?: string
 }
 
+interface AdsConfig {
+  [key: string]: unknown
+}
+
 declare global {
   interface Window {
-    adsbygoogle: unknown[]
+    adsbygoogle: AdsConfig[]
   }
 }
 
@@ -21,7 +25,9 @@ export function AdUnit({ slot, format = 'auto', className = '' }: Props) {
     initialized.current = true
     try {
       ;(window.adsbygoogle = window.adsbygoogle || []).push({})
-    } catch {}
+    } catch (err) {
+      if (process.env.NODE_ENV !== 'production') console.error('[AdUnit] push failed:', err)
+    }
   }, [])
 
   return (
