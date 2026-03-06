@@ -130,10 +130,10 @@ async function generateArticle(theme: string): Promise<boolean> {
   const today = new Date().toISOString().split('T')[0]
   let text: string | null = null
 
-  // Gemini 먼저, 실패 시 Groq 폴백
+  // Groq 먼저, 실패 시 Gemini 폴백
   for (const [name, caller] of [
-    ['Gemini', () => callGemini(theme)],
     ['Groq', () => callGroq(theme)],
+    ['Gemini', () => callGemini(theme)],
   ] as const) {
     try {
       text = await caller()

@@ -71,8 +71,8 @@ export async function generateWithFallback(
   const override = options?._testOverride
 
   const models = [
-    override?.gemini ?? callGemini,
     override?.groq ?? callGroq,
+    override?.gemini ?? callGemini,
     override?.cloudflare ?? callCloudflareAI,
   ]
 
