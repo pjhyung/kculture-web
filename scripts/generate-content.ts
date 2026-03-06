@@ -197,8 +197,13 @@ async function main() {
     await new Promise((r) => setTimeout(r, 4000))
   }
 
+  const total = THEMES.length
+  const succeeded = total - failures
   if (failures > 0) {
-    console.error(`\n${failures} theme(s) failed to generate content`)
+    console.warn(`\n⚠ ${failures}/${total} theme(s) failed — ${succeeded} generated successfully`)
+  }
+  if (succeeded === 0) {
+    console.error('All themes failed. Exiting with error.')
     process.exit(1)
   }
 }
