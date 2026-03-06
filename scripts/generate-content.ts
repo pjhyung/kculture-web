@@ -57,10 +57,26 @@ Format as JSON:
 `
 }
 
-function parseArticleText(text: string): unknown {
-  const stripped = text.replace(/```(?:json)?\s*/g, '').replace(/```/g, '').trim()
-  const jsonMatch = stripped.match(/\{[\s\S]*\}/)
-  return JSON.parse(jsonMatch ? jsonMatch[0] : stripped)
+function parseArticleText(text: string, theme: string): unknown {
+  // 1. 직접 파싱 시도
+  try { return JSON.parse(text.trim()) } catch { /* continue */ }
+
+  // 2. 코드블록 래퍼만 제거 (```json ... ``` 바깥쪽만)
+  const stripped = text
+    .replace(/^```(?:json)?\s*/m, '')
+    .replace(/\s*```\s*$/m, '')
+    .trim()
+  try { return JSON.parse(stripped) } catch { /* continue */ }
+
+  // 3. { ... } 범위 추출
+  const start = stripped.indexOf('{')
+  const end = stripped.lastIndexOf('}')
+  if (start !== -1 && end !== -1 && end > start) {
+    try { return JSON.parse(stripped.slice(start, end + 1)) } catch { /* continue */ }
+  }
+
+  console.error(`[${theme}] Raw response (first 500 chars):`, text.slice(0, 500))
+  throw new Error('All JSON parse attempts failed')
 }
 
 async function callGemini(theme: string): Promise<string> {
@@ -109,7 +125,7 @@ async function generateArticle(theme: string): Promise<boolean> {
 
   let article: unknown
   try {
-    article = parseArticleText(text)
+    article = parseArticleText(text, theme)
   } catch {
     console.error(`Failed to parse JSON for ${theme}`)
     return false
