@@ -29,6 +29,7 @@ export function ExploreCard({ theme }: Props) {
   const [data, setData] = useState<ExploreData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const themeConfig = THEME_CONFIG[theme]
 
   const fetchExplore = async (choice: string, signal?: AbortSignal) => {
@@ -44,13 +45,10 @@ export function ExploreCard({ theme }: Props) {
       const result: ExploreData = await res.json()
       setData(result)
       setStep(prev => prev + 1)
+      setHasError(false)
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return
-      setData({
-        content: 'Something went wrong. Please try again.',
-        choices: [],
-        recommendations: [],
-      })
+      setHasError(true)
     } finally {
       setLoading(false)
       setIsTransitioning(false)
@@ -71,8 +69,23 @@ export function ExploreCard({ theme }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 에러 발생 시 재시도 화면
+  if (!loading && hasError) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-[#9A9AB0] mb-6">Something went wrong. Please try again.</p>
+        <button
+          onClick={() => { setHasError(false); fetchExplore('start') }}
+          className="bg-[#E94560] text-white px-6 py-3 rounded-full hover:bg-[#c73650] transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
+
   // 최대 7스텝 또는 선택지 없을 때 완료 화면
-  if (!loading && (step > 7 || (data && data.choices.length === 0))) {
+  if (!loading && !hasError && (step > 7 || (data && data.choices.length === 0))) {
     return (
       <div className="text-center py-10">
         <p className="text-[#F5A623] text-xl font-playfair mb-4">Journey Complete!</p>

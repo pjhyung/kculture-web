@@ -80,7 +80,8 @@ export async function generateWithFallback(
     try {
       const result = await callModel(prompt)
       if (result.content) return result
-    } catch {
+    } catch (err) {
+      console.error(`[AI Chain] ${callModel.name} failed:`, err)
       continue
     }
   }

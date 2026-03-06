@@ -45,13 +45,29 @@ export async function POST(req: NextRequest) {
     const prompt = buildExplorePrompt(theme, step, choice)
     const aiResponse = await generateWithFallback(prompt)
 
-    // JSON 파싱 (AI가 ```json ... ``` 형태로 반환할 수 있으므로 정제)
+    // AI 전체 실패 시 캐시 폴백 → 정적 탐색 데이터로 포맷
     let parsed
-    try {
-      const cleaned = aiResponse.content.replace(/```json\n?|\n?```/g, '').trim()
-      parsed = JSON.parse(cleaned)
-    } catch {
-      parsed = { content: aiResponse.content, choices: [], recommendations: [] }
+    if (aiResponse.model === 'cache') {
+      parsed = {
+        content: aiResponse.content,
+        choices: [
+          { value: 'kpop', label: '🎵 Explore K-Pop' },
+          { value: 'kdrama', label: '🎬 Discover K-Drama' },
+          { value: 'tradition', label: '🏯 Traditional Korea' },
+        ],
+        recommendations: [],
+      }
+    } else {
+      // JSON 파싱 (AI가 ```json ... ``` 형태로 반환할 수 있으므로 정제)
+      try {
+        // 코드블록 제거 후 JSON 오브젝트 추출 (Gemini가 앞뒤에 텍스트를 붙이는 경우 대응)
+        const stripped = aiResponse.content.replace(/```(?:json)?\s*/g, '').replace(/```/g, '').trim()
+        const jsonMatch = stripped.match(/\{[\s\S]*\}/)
+        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : stripped)
+      } catch {
+        console.error('[Explore API] Failed to parse AI response:', aiResponse.content.slice(0, 300))
+        return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
+      }
     }
 
     const result = { ...parsed, model: aiResponse.model }
