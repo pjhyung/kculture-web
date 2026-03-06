@@ -57,23 +57,49 @@ Format as JSON:
 `
 }
 
-function parseArticleText(text: string, theme: string): unknown {
-  // 1. 직접 파싱 시도
-  try { return JSON.parse(text.trim()) } catch { /* continue */ }
+/** LLM이 JSON 문자열 안에 literal newline을 넣는 경우 \n으로 이스케이프 */
+function repairLiteralNewlines(text: string): string {
+  let inString = false
+  let escaped = false
+  let result = ''
+  for (const char of text) {
+    if (escaped) {
+      result += char
+      escaped = false
+    } else if (char === '\\') {
+      result += char
+      escaped = true
+    } else if (char === '"') {
+      result += char
+      inString = !inString
+    } else if (inString && char === '\n') {
+      result += '\\n'
+    } else if (inString && char === '\r') {
+      // skip bare CR
+    } else {
+      result += char
+    }
+  }
+  return result
+}
 
-  // 2. 코드블록 래퍼만 제거 (```json ... ``` 바깥쪽만)
+function parseArticleText(text: string, theme: string): unknown {
+  // 0. 코드블록 래퍼 제거 후 { ... } 범위 추출
   const stripped = text
     .replace(/^```(?:json)?\s*/m, '')
     .replace(/\s*```\s*$/m, '')
     .trim()
-  try { return JSON.parse(stripped) } catch { /* continue */ }
-
-  // 3. { ... } 범위 추출
   const start = stripped.indexOf('{')
   const end = stripped.lastIndexOf('}')
-  if (start !== -1 && end !== -1 && end > start) {
-    try { return JSON.parse(stripped.slice(start, end + 1)) } catch { /* continue */ }
-  }
+  const candidate = (start !== -1 && end > start)
+    ? stripped.slice(start, end + 1)
+    : stripped
+
+  // 1. 직접 파싱
+  try { return JSON.parse(candidate) } catch { /* continue */ }
+
+  // 2. literal newline 수리 후 재시도
+  try { return JSON.parse(repairLiteralNewlines(candidate)) } catch { /* continue */ }
 
   console.error(`[${theme}] Raw response (first 500 chars):`, text.slice(0, 500))
   throw new Error('All JSON parse attempts failed')
